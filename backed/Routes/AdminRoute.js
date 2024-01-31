@@ -1,5 +1,5 @@
 import express from 'express';
-import {addcourse} from '../controllers/admin_control.js';
+import {addcourse, addstudent} from '../controllers/admin_control.js';
 import {getcourse} from '../controllers/admin_control.js';
 import {getsinglecourse} from '../controllers/admin_control.js';
 import {updatecourse} from '../controllers/admin_control.js';
@@ -21,6 +21,8 @@ Admin.get('/singlecourse/:courseid',getsinglecourse)
 Admin.post('/editcourse/:editcourseid', updatecourse);
 Admin.post('/deletecourse/:id', deletecourse);
 Admin.post('/adminupdateprofile', updateprofile);
+Admin.post('/addstudent',  addstudent);
+
 
 
 

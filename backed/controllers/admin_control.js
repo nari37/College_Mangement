@@ -126,11 +126,54 @@ const deletecourse = (req, res) => {
 
   // add student....
 
+  // const addstudent = 
+  //   async (req, res) => {
+  //     try {
+  //       const {
+  //         firstName,
+  //         email,
+  //         gender,
+  //         password,
+  //         address,
+  //         courses,
+  //       } = req.body;
+  //   console.log(req.body)
+  //       // Handle the file upload if it exists
+  //       if (req.file) {
+  //         // Access file data using req.file.buffer
+  //         console.log('File received:', req.file);
+  //       }
+    
+  //       // Check if the email already exists in the database
+  //       const emailExistsQuery = 'SELECT COUNT(*) AS count FROM student WHERE email = ?';
+  //       const emailExistsValues = [email];
+    
+  //       const [emailExistsResult] = await connection.promise().query(emailExistsQuery, emailExistsValues);
+    
+  //       if (emailExistsResult[0].count > 0) {
+  //         console.log('Email already exists. Cannot add the same email again.');
+  //         return res.status(400).json({ error: 'Email already exists' });
+  //       }
+    
+  //       // Insert data into the "student" table
+  //       const insertQuery = 'INSERT INTO student (first_name, email, gender, password, address, courses) VALUES (?, ?, ?, ?, ?, ?)';
+  //       const insertValues = [firstName, email, gender, password, address, courses];
+    
+  //       const [insertResult] = await connection.promise().query(insertQuery, insertValues);
+    
+  //       console.log('Student added successfully!');
+  //       return res.status(200).json({ message: 'Student added successfully!' });
+    
+  //     } catch (error) {
+  //       console.error('Error adding student:', error.message);
+  //       return res.status(500).json({ error: 'Internal Server Error' });
+  //     }
+  // }
+  
   const addstudent = (req,res) => {
-
+    const mydata = req.body;
+    console.log('studnetdata...',mydata)
   }
-  
-  
   
 
 export {
