@@ -172,7 +172,10 @@ const deletecourse = (req, res) => {
   
   const addstudent = (req,res) => {
     const mydata = req.body;
-    console.log('studnetdata...',mydata)
+    const file = req.file;
+    console.log('studnetdata....',mydata)
+    console.log('file....',file)
+
   }
   
 
