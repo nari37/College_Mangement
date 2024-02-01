@@ -170,13 +170,59 @@ const deletecourse = (req, res) => {
   //     }
   // }
   
-  const addstudent = (req,res) => {
-    const mydata = req.body;
-    const file = req.file;
-    console.log('studnetdata....',mydata)
-    console.log('file....',file)
+  
 
-  }
+  const addstudent = (req, res) => {
+    // Check if email already exists
+    const checkEmailQuery = "SELECT COUNT(*) AS count FROM student WHERE email = ?";
+    db.query(checkEmailQuery, [req.body.email], (emailCheckErr, emailCheckResults) => {
+      if (emailCheckErr) {
+        return res.status(500).send(emailCheckErr);
+      }
+  
+      const emailCount = emailCheckResults[0].count;
+  
+      if (emailCount > 0) {
+        // Email already exists, send a response indicating the conflict
+        return res.status(409).send("Email already exists");
+      }
+  
+      // Continue with insertion if email doesn't exist
+      if (req.file) {
+        console.log('File details:', {
+          originalname: req.file.originalname,
+          filename: req.file.filename,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+        });
+      } else {
+        console.log('No file uploaded');
+      }
+  
+      console.log('student data', req.body.firstName);
+  
+      const values = [
+        req.body.ROLE_TYPE,
+        req.body.firstName,
+        req.body.email,
+        req.body.password,
+        req.body.gender,
+        req.file.filename,
+        req.body.address,
+        req.body.courses
+      ];
+  
+      const sql = "INSERT INTO student (`ROLE_TYPE`,`first_name`,`email`,`password`,`gender`,`profile`,`address`,`course`) VALUES (?)";
+  
+      db.query(sql, [values], (err, row) => {
+        if (!err) {
+          res.send(row);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+    });
+  };
   
 
 export {
