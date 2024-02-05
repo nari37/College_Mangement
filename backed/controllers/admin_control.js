@@ -1,4 +1,35 @@
 import db from "../index.js";
+import bcryptjs from "bcryptjs";
+import jwt from 'jsonwebtoken';
+
+// admin login....
+const adminlogin = (req, res) => {
+
+  const {email,password} = req.body;
+ 
+
+
+  const sql = 'SELECT * FROM admin WHERE email = ? AND password = ?'
+  db.query (sql,[email,password],(error,results)=>{
+    if (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+    if (results.length > 0) {
+      // Admin credentials are valid, create a JWT token
+      const token = jwt.sign({ ROLE_TYPE: 'Admin' }, '111'); // Replace 'yourSecretKey' with your actual secret key
+
+      // Send the token back to the client
+      res.json({ token, ROLE_TYPE: 'Admin', email: results[0].email });
+    } else {
+      res.status(401).json({ message: 'Invalid credentials' });
+    }
+  });
+
+  }
+  
+
 
 
 
@@ -46,7 +77,7 @@ const updateprofile = (req,res)=>{
 //...get course..
   const getcourse = (req, res) => {
     try {
-      const sql = 'SELECT * FROM course';
+      const sql = "SELECT * FROM `course`";
       db.query(sql, (err,results)=>{
         if (err) {
             console.error('Error retrieving course data:', err);
@@ -172,6 +203,59 @@ const deletecourse = (req, res) => {
   
   
 
+  // const addstudent = (req, res) => {
+  //   // Check if email already exists
+  //   const checkEmailQuery = "SELECT COUNT(*) AS count FROM student WHERE email = ?";
+  //   db.query(checkEmailQuery, [req.body.email], (emailCheckErr, emailCheckResults) => {
+  //     if (emailCheckErr) {
+  //       return res.status(500).send(emailCheckErr);
+  //     }
+  
+  //     const emailCount = emailCheckResults[0].count;
+  
+  //     if (emailCount > 0) {
+  //       // Email already exists, send a response indicating the conflict
+  //       return res.status(409).send("Email already exists");
+  //     }
+  
+  //     // Continue with insertion if email doesn't exist
+  //     if (req.file) {
+  //       console.log('File details:', {
+  //         originalname: req.file.originalname,
+  //         filename: req.file.filename,
+  //         mimetype: req.file.mimetype,
+  //         size: req.file.size,
+  //       });
+  //     } else {
+  //       console.log('No file uploaded');
+  //     }
+  
+  //     console.log('student data', req.body.firstName);
+  
+  //     const values = [
+  //       req.body.ROLE_TYPE,
+  //       req.body.firstName,
+  //       req.body.email,
+  //       req.body.password,
+  //       req.body.gender,
+  //       req.file.filename,
+  //       req.body.address,
+  //       req.body.courses
+  //     ];
+  //     const sql = "INSERT INTO student (`ROLE_TYPE`,`first_name`,`email`,`password`,`gender`,`profile`,`address`,`course`) VALUES (?)";
+  
+  //     db.query(sql, [values], (err, row) => {
+  //       if (!err) {
+  //         res.send(row);
+  //       } else {
+  //         res.status(500).send(err);
+  //       }
+  //     });
+  //   });
+  // };
+
+  // ...........
+
   const addstudent = (req, res) => {
     // Check if email already exists
     const checkEmailQuery = "SELECT COUNT(*) AS count FROM student WHERE email = ?";
@@ -188,26 +272,34 @@ const deletecourse = (req, res) => {
       }
   
       // Continue with insertion if email doesn't exist
-      if (req.file) {
-        console.log('File details:', {
-          originalname: req.file.originalname,
-          filename: req.file.filename,
-          mimetype: req.file.mimetype,
-          size: req.file.size,
-        });
-      } else {
-        console.log('No file uploaded');
+      if (!req.body.firstName) {
+        return res.status(400).send("First Name is required");
       }
   
+      if (!req.file) {
+        return res.status(400).send("File should be uploaded");
+      }
+  
+      console.log('File details:', {
+        originalname: req.file.originalname,
+        filename: req.file.filename,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+      });
+  
       console.log('student data', req.body.firstName);
+      
+      const { password } = req.body;
+      const hashedpassword = bcryptjs.hashSync(password, 10);
+      console.log('hash is applied...', hashedpassword);
   
       const values = [
         req.body.ROLE_TYPE,
         req.body.firstName,
         req.body.email,
-        req.body.password,
+        hashedpassword,
         req.body.gender,
-        req.file.filename,
+        req.file ? req.file.filename : null,
         req.body.address,
         req.body.courses
       ];
@@ -224,14 +316,16 @@ const deletecourse = (req, res) => {
     });
   };
   
+  
 
 export {
   updateprofile,
+    adminlogin,
     addcourse,
     getcourse,
     getsinglecourse,
     updatecourse,
     deletecourse,
-    addstudent
+    addstudent,
 }
  

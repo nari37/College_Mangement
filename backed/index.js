@@ -1,6 +1,6 @@
 import express from 'express';
 import mysql from 'mysql';
-import admin from './Routes/AdminRoute.js';
+import Admin from './Routes/AdminRoute.js';
 import staff from './Routes/StaffRoute.js';
 import student from './Routes/StudentRoute.js';
 import cors from 'cors'
@@ -31,9 +31,9 @@ db.connect((err)=>{
 
 
 
-app.use('/backend/admin',admin)
-app.use('/backed/staff',staff)
-app.use('/backed/student',student)
+app.use('/backend/admin',Admin)
+app.use('/backend/staff',staff)
+app.use('/backend/student',student)
 
 
 

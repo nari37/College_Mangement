@@ -1,5 +1,5 @@
 import express from 'express';
-import {addcourse, addstudent} from '../controllers/admin_control.js';
+import {addcourse, addstudent, adminlogin} from '../controllers/admin_control.js';
 import {getcourse} from '../controllers/admin_control.js';
 import {getsinglecourse} from '../controllers/admin_control.js';
 import {updatecourse} from '../controllers/admin_control.js';
@@ -25,8 +25,10 @@ const upload = multer({ storage,
 
 const Admin = express.Router();
 
+
+Admin.post('/adminlogin',adminlogin)
 Admin.post('/addcourse',addcourse)
-Admin.get('/getcourses',getcourse)
+Admin.get('/getcourse', getcourse)
 Admin.get('/singlecourse/:courseid',getsinglecourse)
 Admin.post('/editcourse/:editcourseid', updatecourse);
 Admin.post('/deletecourse/:id', deletecourse);
