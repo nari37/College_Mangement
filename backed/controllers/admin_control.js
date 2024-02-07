@@ -1,43 +1,106 @@
 import db from "../index.js";
 import bcryptjs from "bcryptjs";
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+
+
 
 // admin login....
 const adminlogin = (req, res) => {
+  const { email, password } = req.body;
 
-  const {email,password} = req.body;
- 
-
-
-  const sql = 'SELECT * FROM admin WHERE email = ? AND password = ?'
-  db.query (sql,[email,password],(error,results)=>{
+  const sql = 'SELECT * FROM admin'; // Remove WHERE clause
+  db.query(sql, async (error, results) => {
     if (error) {
       console.error(error);
       res.status(500).json({ message: 'Internal server error' });
       return;
     }
-    if (results.length > 0) {
-      // Admin credentials are valid, create a JWT token
-      const token = jwt.sign({ ROLE_TYPE: 'Admin' }, '111'); // Replace 'yourSecretKey' with your actual secret key
 
-      // Send the token back to the client
-      res.json({ token, ROLE_TYPE: 'Admin', email: results[0].email });
+    if (results.length > 0) {
+      // Compare the hashed password with the provided password
+      const hashedPasswordFromDB = results[0].password;
+
+      const passwordMatch = await bcryptjs.compare(password, hashedPasswordFromDB);
+
+      if (passwordMatch) {
+        // Admin credentials are valid, create a JWT token
+        const token = jwt.sign({ ROLE_TYPE: email }, process.env.JWT_SECRET, { expiresIn: '2d' });
+
+        // Send the token back to the client as a cookie
+        res.cookie('cookie', token);
+
+        // Send additional data in the response body if needed
+        res.json({  id:results[0].id, ROLE_TYPE: 'Admin', email: results[0].email,gender:results[0].gender,firstname: results[0].first_name,profile:results[0].profile,address:results[0].address});
+
+
+      } else {
+        res.status(401).json({ message: 'Invalid credentials' });
+      }
     } else {
       res.status(401).json({ message: 'Invalid credentials' });
     }
   });
+};
 
-  }
   
 
-
-
-
-
-const updateprofile = (req,res)=>{
-  const {data} = req.body;
-  console.log(data)
+//   get admindetails....
+const admingetdeatils = (req,res)=>{
+   const sql = "SELECT * FROM admin"
+   db.query(sql,(err,result)=>{
+if(err){
+  console.log(err);
+  res.status(500).json({message:"internal server error"})
+}else{
+  res.status(200).json({ message: "Data received successfully", data: result }); 
+  
 }
+   })
+}
+
+
+
+
+  const updateprofile = (req, res) => {
+    const data = req.body;
+  
+    console.log('admin details:', {
+      originalname: req.file.originalname,
+      filename: req.file.filename,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+    });
+  
+    console.log("data is", data);
+  
+    const hashedpassword = bcryptjs.hashSync(req.body.password, 10);
+    console.log("hashed.....", hashedpassword);
+  
+    const values = [
+      req.body.firstName,
+      req.body.email,
+      req.body.gender,
+      hashedpassword,
+      req.body.address,
+      req.file.filename
+    ];
+  
+    const sql = "UPDATE admin SET first_name=?, email=?, gender=?, password=?, address=?, profile=? WHERE ROLE_TYPE = 'Admin'";
+  
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(500).json({ message: "Internal server error" });
+      } else {
+        res.status(200).json({ message: "Updated successfully", result });
+      }
+    });
+  };
+  
 
 // ...addcourse..
   const addcourse = (req, res) => {
@@ -315,11 +378,72 @@ const deletecourse = (req, res) => {
       });
     });
   };
+
+  const addstaff = (req, res) => {
+    // Check if email already exists
+    const checkEmailQuery = "SELECT COUNT(*) AS count FROM staff WHERE email = ?";
+    db.query(checkEmailQuery, [req.body.email], (emailCheckErr, emailCheckResults) => {
+      if (emailCheckErr) {
+        return res.status(500).send(emailCheckErr);
+      }
+  
+      const emailCount = emailCheckResults[0].count;
+  
+      if (emailCount > 0) {
+        // Email already exists, send a response indicating the conflict
+        return res.status(409).send("Email already exists");
+      }
+  
+      // Continue with insertion if email doesn't exist
+      if (!req.body.firstName) {
+        return res.status(400).send("First Name is required");
+      }
+  
+      if (!req.file) {
+        return res.status(400).send("File should be uploaded");
+      }
+  
+      console.log('File details:', {
+        originalname: req.file.originalname,
+        filename: req.file.filename,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+      });
+  
+      console.log('student data', req.body.firstName);
+      
+      const { password } = req.body;
+      const hashedpassword = bcryptjs.hashSync(password, 10);
+      console.log('hash is applied...', hashedpassword);
+  
+      const values = [
+        req.body.ROLE_TYPE,
+        req.body.firstName,
+        req.body.email,
+        hashedpassword,
+        req.body.gender,
+        req.file ? req.file.filename : null,
+        req.body.address,
+        req.body.courses
+      ];
+  
+      const sql = "INSERT INTO staff (`ROLE_TYPE`,`first_name`,`email`,`password`,`gender`,`profile`,`address`,`course`) VALUES (?)";
+  
+      db.query(sql, [values], (err, row) => {
+        if (!err) {
+          res.send(row);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+    });
+  };
   
   
 
 export {
   updateprofile,
+  admingetdeatils,
     adminlogin,
     addcourse,
     getcourse,
@@ -327,5 +451,6 @@ export {
     updatecourse,
     deletecourse,
     addstudent,
+    addstaff
 }
  

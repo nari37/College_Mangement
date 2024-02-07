@@ -1,12 +1,12 @@
 import express from 'express';
-import login from '../controllers/student_control.js';
+import { studentlogin } from '../controllers/student_control.js';
 
 
 
 const student = express.Router();
 
 
-student.post('/login',login)
+student.post('/studentlogin', studentlogin)
 
 
 export default student;

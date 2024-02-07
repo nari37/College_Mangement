@@ -1,5 +1,5 @@
 import express from 'express';
-import {addcourse, addstudent, adminlogin} from '../controllers/admin_control.js';
+import {addcourse, addstaff, addstudent, admingetdeatils, adminlogin} from '../controllers/admin_control.js';
 import {getcourse} from '../controllers/admin_control.js';
 import {getsinglecourse} from '../controllers/admin_control.js';
 import {updatecourse} from '../controllers/admin_control.js';
@@ -27,13 +27,16 @@ const Admin = express.Router();
 
 
 Admin.post('/adminlogin',adminlogin)
+Admin.get('/getadmindetails',admingetdeatils)
 Admin.post('/addcourse',addcourse)
 Admin.get('/getcourse', getcourse)
 Admin.get('/singlecourse/:courseid',getsinglecourse)
 Admin.post('/editcourse/:editcourseid', updatecourse);
 Admin.post('/deletecourse/:id', deletecourse);
-Admin.post('/adminupdateprofile', updateprofile);
+Admin.post('/adminupdateprofile',upload.single('file'), updateprofile);
 Admin.post('/addstudent', upload.single('file'), addstudent);
+Admin.post('/addstaff', upload.single('file'), addstaff);
+
 
 
 

@@ -4,10 +4,15 @@ import Admin from './Routes/AdminRoute.js';
 import staff from './Routes/StaffRoute.js';
 import student from './Routes/StudentRoute.js';
 import cors from 'cors'
+import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+dotenv.config();
+
 
  const app = express();
   app.use(cors());
   app.use(express.json());
+  app.use(cookieParser());
 
 
 const db = mysql.createConnection({
